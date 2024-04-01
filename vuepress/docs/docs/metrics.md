@@ -1,7 +1,7 @@
 # Metrics
 
 Shardcake exposes a few metrics to give you better visibility into the state of your cluster.
-Those metrics are exposed via [ZIO Metrics](https://zio.dev/reference/observability/metrics/), which allows you to use the [metrics backend of your choice](https://zio.dev/zio-metrics-connectors/).
+Those metrics are exposed via [ZIO Metrics](https://zio.dev/reference/observability/metrics/), which allows you to use the [backend of your choice](https://zio.dev/zio-metrics-connectors/).
 
 ## Shard Manager Metrics
 - `shardcake.pods` (gauge): Number of pods currently registered
