@@ -13,4 +13,4 @@ Those metrics are exposed via [ZIO Metrics](https://zio.dev/reference/observabil
 ## Pod Metrics
 - `shardcake.shards` (gauge): Number of shards currently assigned to the pod
 - `shardcake.entities` (gauge): Number of entities currently running on the pod
-- `shardcake.singletons` (counter): Number of singletons currently running on the pod
+- `shardcake.singletons` (gauge): Number of singletons currently running on the pod
