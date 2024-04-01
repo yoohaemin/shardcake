@@ -211,6 +211,10 @@ Success(HashSet(user1, user5, user4, user2, user3))
 Failure(java.lang.Exception: Guild is already full!)
 ```
 
+#### Streaming
+In addition to `send`, you can also use `sendStream` to get a stream of replies rather than a single reply.
+That function gives you a `StreamReplier[A]` instead of a `Replier[A]`, which allows the entity to reply with a stream.
+
 #### One more thing...
 `Sharding` also exposes 2 methods that can be interesting for some use cases:
 - `registerSingleton` lets you register some background processes that will run in only one pod at any given time. Singletons can't receive messages and they are not stopped in case of inactivity.
