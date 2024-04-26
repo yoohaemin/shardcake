@@ -8,7 +8,7 @@ val zioK8sVersion         = "2.1.1"
 val zioCacheVersion       = "0.2.3"
 val zioCatsInteropVersion = "23.1.0.0"
 val sttpVersion           = "3.9.3"
-val calibanVersion        = "2.5.3"
+val calibanVersion        = "2.6.0"
 val redis4catsVersion     = "1.5.2"
 val redissonVersion       = "3.27.1"
 val scalaKryoVersion      = "1.0.2"
@@ -80,10 +80,7 @@ lazy val manager = project
   .settings(
     libraryDependencies ++=
       Seq(
-        "com.github.ghostdogpr"       %% "caliban"          % calibanVersion,
-        "com.github.ghostdogpr"       %% "caliban-quick"    % calibanVersion,
-        "com.github.ghostdogpr"       %% "caliban-zio-http" % calibanVersion,
-        "com.softwaremill.sttp.tapir" %% "tapir-json-zio"   % "1.9.8"
+        "com.github.ghostdogpr" %% "caliban-quick" % calibanVersion
       )
   )
 
