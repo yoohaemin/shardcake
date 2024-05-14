@@ -4,8 +4,6 @@ import caliban.client.Operations.IsOperation
 import caliban.client.SelectionBuilder
 import com.devsisters.shardcake.internal.GraphQLClient
 import com.devsisters.shardcake.internal.GraphQLClient.PodAddressInput
-import sttp.capabilities.WebSockets
-import sttp.capabilities.zio.ZioStreams
 import sttp.client3.SttpBackend
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio.{ Config => _, _ }
@@ -26,10 +24,10 @@ object ShardManagerClient {
    * A layer that returns a client for the Shard Manager API.
    * It requires an sttp backend. If you don't want to use your own backend, simply use `liveWithSttp`.
    */
-  val live: ZLayer[Config with SttpBackend[Task, ZioStreams with WebSockets], Nothing, ShardManagerClientLive] =
+  val live: ZLayer[Config with SttpBackend[Task, Any], Nothing, ShardManagerClientLive] =
     ZLayer {
       for {
-        sttpClient <- ZIO.service[SttpBackend[Task, ZioStreams with WebSockets]]
+        sttpClient <- ZIO.service[SttpBackend[Task, Any]]
         config     <- ZIO.service[Config]
       } yield new ShardManagerClientLive(sttpClient, config)
     }
@@ -58,10 +56,7 @@ object ShardManagerClient {
       }
     }
 
-  class ShardManagerClientLive(
-    sttp: SttpBackend[Task, ZioStreams with WebSockets],
-    config: Config
-  ) extends ShardManagerClient {
+  class ShardManagerClientLive(sttp: SttpBackend[Task, Any], config: Config) extends ShardManagerClient {
     private def send[Origin: IsOperation, A](query: SelectionBuilder[Origin, A]): Task[A] =
       sttp.send(query.toRequest(config.shardManagerUri)).map(_.body).absolve
 
