@@ -7,6 +7,8 @@ import example.complex.GuildBehavior.GuildMessage.{ Join, Terminate }
 import example.complex.GuildBehavior._
 import zio.{ Config => _, _ }
 
+import scala.collection.compat._
+
 object GuildApp extends ZIOAppDefault {
   val config: ZLayer[Any, SecurityException, Config] =
     ZLayer(

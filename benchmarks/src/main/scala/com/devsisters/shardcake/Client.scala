@@ -1,9 +1,8 @@
 package com.devsisters.shardcake
 
-import com.devsisters.shardcake.Config
 import com.devsisters.shardcake.Server.Message.Ping
 import com.devsisters.shardcake.Server.PingPongEntity
-import zio._
+import zio.{ Config => _, _ }
 
 object Client {
   // self host should not be `localhost` to avoid optimization

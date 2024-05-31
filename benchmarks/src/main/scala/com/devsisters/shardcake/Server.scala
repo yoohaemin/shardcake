@@ -1,8 +1,7 @@
 package com.devsisters.shardcake
 
-import com.devsisters.shardcake.Config
 import com.devsisters.shardcake.interfaces.Storage
-import zio._
+import zio.{ Config => _, _ }
 import zio.stream.ZStream
 
 import java.util.concurrent.ForkJoinPool

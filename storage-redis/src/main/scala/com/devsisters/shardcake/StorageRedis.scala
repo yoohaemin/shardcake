@@ -8,6 +8,8 @@ import zio.stream.ZStream
 import zio.stream.interop.fs2z._
 import zio.{ Task, ZIO, ZLayer }
 
+import scala.collection.compat._
+
 object StorageRedis {
   type fs2Stream[A] = fs2.Stream[Task, A]
   type Redis        = RedisCommands[Task, String, String] with PubSubCommands[fs2Stream, String, String]

@@ -1,6 +1,7 @@
+val scala212 = "2.12.18"
 val scala213 = "2.13.13"
 val scala3   = "3.3.3"
-val allScala = Seq(scala213, scala3)
+val allScala = Seq(scala212, scala213, scala3)
 
 val zioVersion            = "2.1.1"
 val zioGrpcVersion        = "0.6.2"
@@ -14,6 +15,7 @@ val redis4catsVersion     = "1.5.2"
 val redissonVersion       = "3.27.1"
 val scalaKryoVersion      = "1.0.2"
 val testContainersVersion = "0.41.3"
+val scalaCompatVersion    = "2.12.0"
 
 inThisBuild(
   List(
@@ -69,8 +71,9 @@ lazy val core = project
   .settings(
     libraryDependencies ++=
       Seq(
-        "dev.zio" %% "zio"         % zioVersion,
-        "dev.zio" %% "zio-streams" % zioVersion
+        "dev.zio"                %% "zio"                     % zioVersion,
+        "dev.zio"                %% "zio-streams"             % zioVersion,
+        "org.scala-lang.modules" %% "scala-collection-compat" % scalaCompatVersion
       )
   )
 

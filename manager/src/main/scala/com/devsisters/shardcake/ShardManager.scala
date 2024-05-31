@@ -9,6 +9,7 @@ import zio._
 import zio.stream.ZStream
 
 import scala.annotation.tailrec
+import scala.collection.compat._
 
 /**
  * A component in charge of assigning and unassigning shards to/from pods
@@ -106,7 +107,7 @@ class ShardManager(
                                                                .ping(pod)
                                                                .timeout(config.pingTimeout)
                                                                .someOrFailException
-                                                               .fold(_ => Set(pod), _ => Set.empty)
+                                                               .fold(_ => Set(pod), _ => Set.empty[PodAddress])
                                                            )
                                                            .map(_.flatten)
         shardsToRemove                                 =
@@ -128,7 +129,7 @@ class ShardManager(
                                                              )
                                                            }
                                                            .map(_.unzip)
-                                                           .map { case (pods, shards) => (pods.flatten.toSet, shards.flatten.toSet) }
+                                                           .map { case (pods, shards) => (pods.flatten[PodAddress].toSet, shards.flatten[ShardId].toSet) }
         (failedUnassignedPods, failedUnassignedShards) = failed
         // remove assignments of shards that couldn't be unassigned, as well as faulty pods
         filteredAssignments                            = (readyAssignments -- failedUnassignedPods).map { case (pod, shards) =>
@@ -147,7 +148,7 @@ class ShardManager(
                                                                    eventsHub.publish(ShardingEvent.ShardsAssigned(pod, shards)).as(Set.empty)
                                                              )
                                                            }
-                                                           .map(_.flatten.toSet)
+                                                           .map(_.flatten[PodAddress].toSet)
         failedPods                                     = failedPingedPods ++ failedUnassignedPods ++ failedAssignedPods
         // check if failing pods are still up
         _                                             <- ZIO.foreachDiscard(failedPods)(notifyUnhealthyPod).forkDaemon
@@ -316,7 +317,9 @@ object ShardManager {
   ): (Map[PodAddress, Set[ShardId]], Map[PodAddress, Set[ShardId]]) = {
     val (_, assignments)    = shardsToRebalance.foldLeft((state.shardsPerPod, List.empty[(ShardId, PodAddress)])) {
       case ((shardsPerPod, assignments), shard) =>
-        val unassignedPods = assignments.flatMap { case (shard, _) => state.shards.get(shard).flatten }.toSet
+        val unassignedPods = assignments.flatMap { case (shard, _) =>
+          state.shards.get(shard).flatten[PodAddress]
+        }.toSet
         // find pod with least amount of shards
         shardsPerPod
           // keep only pods with the max version

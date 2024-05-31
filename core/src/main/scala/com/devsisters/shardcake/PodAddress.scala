@@ -1,5 +1,7 @@
 package com.devsisters.shardcake
 
+import scala.collection.compat._
+
 case class PodAddress(host: String, port: Int) {
   override def toString: String = s"$host:$port"
 }

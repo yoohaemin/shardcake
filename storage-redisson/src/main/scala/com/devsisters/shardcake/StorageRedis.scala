@@ -9,6 +9,8 @@ import org.redisson.client.codec.StringCodec
 import zio.stream.ZStream
 import zio.{ Queue, Task, Unsafe, ZIO, ZLayer }
 
+import scala.collection.compat._
+
 object StorageRedis {
 
   /**

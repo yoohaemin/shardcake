@@ -111,7 +111,7 @@ object ShardingSpec extends ZIOSpecDefault {
             _   <- Sharding.registerSingleton("singleton", p.succeed(()) *> ZIO.never)
             _   <- Sharding.registerScoped
             res <- p.await
-          } yield assertTrue(res == ())
+          } yield assertTrue(() == res)
         }
       },
       test("Send stream") {

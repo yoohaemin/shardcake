@@ -242,7 +242,7 @@ class Sharding private (
           (shardManager.notifyUnhealthyPod(pod) *>
             // just in case we missed the update from the pubsub, refresh assignments
             shardManager.getAssignments
-              .flatMap(updateAssignments(_, fromShardManager = true))).forkDaemon
+              .flatMap[Any, Throwable, Unit](updateAssignments(_, fromShardManager = true))).forkDaemon
         )
       }
 
@@ -337,7 +337,8 @@ class Sharding private (
         }
 
       def sendStream(entityId: String)(messages: ZStream[Any, Throwable, Msg]): Task[Unit] = {
-        val send = ReplyChannel.single[Unit].flatMap(sendStreamGeneric(entityId, messages, None, _))
+        val send =
+          ReplyChannel.single[Unit].flatMap[Any, Throwable, Unit](sendStreamGeneric(entityId, messages, None, _))
         timeout.fold(send)(t => send.timeout(t).unit)
       }
 
