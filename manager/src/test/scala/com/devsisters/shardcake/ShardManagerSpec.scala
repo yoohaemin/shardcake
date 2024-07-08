@@ -173,6 +173,32 @@ object ShardManagerSpec extends ZIOSpecDefault {
                            )
 
           } yield assert1 && assert2).provide(shardManager)
+        },
+        test("Simulate temporary storage restart followed by manager restart") {
+          {
+            val setup = (for {
+              _ <- simulate((1 to 10).toList.map(i => SimulationEvent.PodRegister(Pod(PodAddress("server", i), "1"))))
+              _ <- TestClock.adjust(10 minutes)
+              // busy wait for the forked daemon fibers to do their job
+              _ <- ZIO.iterate(Map.empty[ShardId, Option[PodAddress]])(_.isEmpty)(_ =>
+                     ZIO.serviceWithZIO[Storage](_.getAssignments)
+                   )
+              _ <- ZIO.iterate(Map.empty[PodAddress, Pod])(_.isEmpty)(_ => ZIO.serviceWithZIO[Storage](_.getPods))
+              // simulate non-persistent storage restart
+              _ <- ZIO.serviceWithZIO[Storage](s => s.saveAssignments(Map.empty) *> s.savePods(Map.empty))
+            } yield {}).provideSome[Storage](
+              ZLayer.makeSome[Storage, ShardManager](config, Pods.noop, PodsHealth.local, ShardManager.live)
+            )
+
+            val test = for {
+              shutdownAssignments <- ZIO.serviceWithZIO[Storage](_.getAssignments)
+              shutdownPods        <- ZIO.serviceWithZIO[Storage](_.getPods)
+            } yield
+            // manager should have saved its state to storage when it shut down
+            assertTrue(shutdownAssignments.nonEmpty && shutdownPods.nonEmpty)
+
+            setup *> test
+          }.provide(Storage.memory)
         }
       )
     )
