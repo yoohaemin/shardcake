@@ -14,6 +14,6 @@ Shardcake exposes a **purely functional API** and depends heavily on [ZIO](https
 
 The [Documentation](https://devsisters.github.io/shardcake/) explains how to use Shardcake, in particular:
 - how to [get started](https://devsisters.github.io/shardcake/docs/)
-- the [architecture](https://devsisters.github.io/shardcake/docs/architecture.html) behind shardcake
+- the [architecture](https://devsisters.github.io/shardcake/docs/architecture.html) behind Shardcake
 - how to [configure](https://devsisters.github.io/shardcake/docs/config.html) it
 - parts you can [customize](https://devsisters.github.io/shardcake/docs/customization.html)
