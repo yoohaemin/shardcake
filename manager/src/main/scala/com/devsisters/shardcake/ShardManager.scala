@@ -10,7 +10,6 @@ import zio.stream.ZStream
 
 import scala.annotation.tailrec
 import scala.collection.compat._
-import scala.collection.immutable.{ BitSet, SortedMap }
 
 /**
  * A component in charge of assigning and unassigning shards to/from pods
@@ -68,7 +67,7 @@ class ShardManager(
           _             <- ZIO.logInfo(s"Unregistering $podAddress")
           unassignments <- stateRef.modify { state =>
                              (
-                               state.shards.collect { case (shard, Some(p)) if p == podAddress => shard }.to(BitSet),
+                               state.shards.collect { case (shard, Some(p)) if p == podAddress => shard }.toSet,
                                state.copy(
                                  pods = state.pods - podAddress,
                                  shards =
@@ -229,7 +228,7 @@ object ShardManager {
         cdt                          <- ZIO.succeed(OffsetDateTime.now())
         initialState                  = ShardManagerState(
                                           filteredPods.map { case (k, v) => k -> PodWithMetadata(v, cdt) },
-                                          (1 to config.numberOfShards).map(_ -> None).to(SortedMap) ++ filteredAssignments
+                                          (1 to config.numberOfShards).map(_ -> None).toMap ++ filteredAssignments
                                         )
         _                            <-
           ZIO.logInfo(
@@ -304,7 +303,7 @@ object ShardManager {
     if (xs eq ys) 0 else loop(xs, ys)
   }
 
-  case class ShardManagerState(pods: Map[PodAddress, PodWithMetadata], shards: SortedMap[ShardId, Option[PodAddress]]) {
+  case class ShardManagerState(pods: Map[PodAddress, PodWithMetadata], shards: Map[ShardId, Option[PodAddress]]) {
     lazy val unassignedShards: Set[ShardId]              = shards.collect { case (k, None) => k }.toSet
     lazy val averageShardsPerPod: ShardId                = if (pods.nonEmpty) shards.size / pods.size else 0
     private lazy val podVersions                         = pods.values.toList.map(extractVersion)
@@ -318,8 +317,12 @@ object ShardManager {
 
   sealed trait ShardingEvent
   object ShardingEvent {
-    case class ShardsAssigned(pod: PodAddress, shards: Set[ShardId])   extends ShardingEvent
-    case class ShardsUnassigned(pod: PodAddress, shards: Set[ShardId]) extends ShardingEvent
+    case class ShardsAssigned(pod: PodAddress, shards: Set[ShardId])   extends ShardingEvent {
+      override def toString: String = s"ShardsAssigned(pod=$pod, shards=${shards.toArray.sortInPlace.mkString("[", ", ", "]")})"
+    }
+    case class ShardsUnassigned(pod: PodAddress, shards: Set[ShardId]) extends ShardingEvent {
+      override def toString: String = s"ShardsUnassigned(pod=$pod, shards=${shards.toArray.sortInPlace.mkString("[", ", ", "]")})"
+    }
     case class PodRegistered(pod: PodAddress)                          extends ShardingEvent
     case class PodUnregistered(pod: PodAddress)                        extends ShardingEvent
     case class PodHealthChecked(pod: PodAddress)                       extends ShardingEvent
@@ -399,8 +402,8 @@ object ShardManager {
         }
     }
     val unassignments       = assignments.flatMap { case (shard, _) => state.shards.get(shard).flatten.map(shard -> _) }
-    val assignmentsPerPod   = assignments.groupBy(_._2).map { case (k, v) => k -> v.map(_._1).to(BitSet) }
-    val unassignmentsPerPod = unassignments.groupBy(_._2).map { case (k, v) => k -> v.map(_._1).to(BitSet) }
+    val assignmentsPerPod   = assignments.groupBy(_._2).map { case (k, v) => k -> v.map(_._1).toSet }
+    val unassignmentsPerPod = unassignments.groupBy(_._2).map { case (k, v) => k -> v.map(_._1).toSet }
     (assignmentsPerPod, unassignmentsPerPod)
   }
 
