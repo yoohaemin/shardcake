@@ -30,7 +30,7 @@ class ShardManager(
   def getShardingEvents: ZStream[Any, Nothing, ShardingEvent] =
     ZStream.fromHub(eventsHub)
 
-  def register(pod: Pod): UIO[Unit] =
+  def register(pod: Pod): Task[Unit] =
     ZIO.ifZIO(healthApi.isAlive(pod.address))(
       onTrue = for {
         _     <- ZIO.logInfo(s"Registering $pod")
@@ -44,7 +44,8 @@ class ShardManager(
         _     <- ZIO.when(state.unassignedShards.nonEmpty)(rebalance(rebalanceImmediately = false))
         _     <- persistPods.forkDaemon
       } yield (),
-      onFalse = ZIO.logWarning(s"Pod $pod requested to register but is not alive, ignoring")
+      onFalse = ZIO.logWarning(s"Pod $pod requested to register but is not alive, ignoring") *>
+        ZIO.fail(new RuntimeException(s"Pod $pod is not healthy"))
     )
 
   def notifyUnhealthyPod(podAddress: PodAddress): UIO[Unit] =
