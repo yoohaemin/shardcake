@@ -10,6 +10,7 @@ import zio.stream.ZStream
 
 import scala.annotation.tailrec
 import scala.collection.compat._
+import scala.collection.immutable.SortedMap
 
 /**
  * A component in charge of assigning and unassigning shards to/from pods
@@ -228,7 +229,7 @@ object ShardManager {
         cdt                          <- ZIO.succeed(OffsetDateTime.now())
         initialState                  = ShardManagerState(
                                           filteredPods.map { case (k, v) => k -> PodWithMetadata(v, cdt) },
-                                          (1 to config.numberOfShards).map(_ -> None).toMap ++ filteredAssignments
+                                          (1 to config.numberOfShards).map(_ -> None).to(SortedMap) ++ filteredAssignments
                                         )
         _                            <-
           ZIO.logInfo(
