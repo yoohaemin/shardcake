@@ -45,7 +45,7 @@ class ShardManager(
         _     <- persistPods.forkDaemon
       } yield (),
       onFalse = ZIO.logWarning(s"Pod $pod requested to register but is not alive, ignoring") *>
-        ZIO.fail(new RuntimeException(s"Pod $pod is not healthy"))
+        ZIO.fail(new RuntimeException(s"Pod $pod is not healthy, refusing to register"))
     )
 
   def notifyUnhealthyPod(podAddress: PodAddress): UIO[Unit] =
