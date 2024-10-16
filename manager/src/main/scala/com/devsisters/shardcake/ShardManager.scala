@@ -10,7 +10,7 @@ import zio.stream.ZStream
 
 import scala.annotation.tailrec
 import scala.collection.compat._
-import scala.collection.immutable.SortedMap
+import scala.collection.immutable.{ BitSet, SortedMap }
 
 /**
  * A component in charge of assigning and unassigning shards to/from pods
@@ -68,7 +68,7 @@ class ShardManager(
           _             <- ZIO.logInfo(s"Unregistering $podAddress")
           unassignments <- stateRef.modify { state =>
                              (
-                               state.shards.collect { case (shard, Some(p)) if p == podAddress => shard }.toSet,
+                               state.shards.collect { case (shard, Some(p)) if p == podAddress => shard }.to(BitSet),
                                state.copy(
                                  pods = state.pods - podAddress,
                                  shards =
@@ -399,8 +399,8 @@ object ShardManager {
         }
     }
     val unassignments       = assignments.flatMap { case (shard, _) => state.shards.get(shard).flatten.map(shard -> _) }
-    val assignmentsPerPod   = assignments.groupBy(_._2).map { case (k, v) => k -> v.map(_._1).toSet }
-    val unassignmentsPerPod = unassignments.groupBy(_._2).map { case (k, v) => k -> v.map(_._1).toSet }
+    val assignmentsPerPod   = assignments.groupBy(_._2).map { case (k, v) => k -> v.map(_._1).to(BitSet) }
+    val unassignmentsPerPod = unassignments.groupBy(_._2).map { case (k, v) => k -> v.map(_._1).to(BitSet) }
     (assignmentsPerPod, unassignmentsPerPod)
   }
 

@@ -12,13 +12,14 @@ import zio.stream.ZStream
 import zio.{ Config => _, _ }
 
 import java.util.concurrent.TimeUnit
+import scala.collection.immutable.BitSet
 
 abstract class GrpcShardingService(sharding: Sharding, timeout: Duration) extends ShardingService {
   def assignShards(request: AssignShardsRequest): ZIO[Any, StatusException, AssignShardsResponse] =
-    sharding.assign(request.shards.toSet).as(AssignShardsResponse())
+    sharding.assign(request.shards.to(BitSet)).as(AssignShardsResponse())
 
   def unassignShards(request: UnassignShardsRequest): ZIO[Any, StatusException, UnassignShardsResponse] =
-    sharding.unassign(request.shards.toSet).as(UnassignShardsResponse())
+    sharding.unassign(request.shards.to(BitSet)).as(UnassignShardsResponse())
 
   def send(request: SendRequest): ZIO[Any, StatusException, SendResponse] =
     sharding
