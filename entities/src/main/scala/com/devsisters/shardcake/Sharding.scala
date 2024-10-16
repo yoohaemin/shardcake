@@ -57,7 +57,7 @@ class Sharding private (
           shardManager.unregister(address).catchAllCause(ZIO.logErrorCause("Error during unregister", _))
     )
 
-  private def isSingletonNode: UIO[Boolean] =
+  val isSingletonNode: UIO[Boolean] =
     // Start singletons on the pod hosting shard 1.
     shardAssignments.get.map(_.get(1).contains(address))
 
@@ -127,7 +127,13 @@ class Sharding private (
       pod     = shards.get(shardId)
     } yield pod.contains(address)
 
-  def getPods: UIO[Set[PodAddress]] =
+  val getAssignments: UIO[Map[ShardId, PodAddress]] =
+    shardAssignments.get
+
+  val thisPodAssignments: UIO[Chunk[ShardId]] =
+    getAssignments.map(_.view.collect { case (shardId, addr) if addr == this.address => shardId }.to(Chunk))
+
+  val getPods: UIO[Set[PodAddress]] =
     shardAssignments.get.map(_.values.toSet)
 
   private def updateAssignments(
