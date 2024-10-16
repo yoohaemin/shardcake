@@ -304,7 +304,7 @@ object ShardManager {
     if (xs eq ys) 0 else loop(xs, ys)
   }
 
-  case class ShardManagerState(pods: Map[PodAddress, PodWithMetadata], shards: Map[ShardId, Option[PodAddress]]) {
+  case class ShardManagerState(pods: Map[PodAddress, PodWithMetadata], shards: SortedMap[ShardId, Option[PodAddress]]) {
     lazy val unassignedShards: Set[ShardId]              = shards.collect { case (k, None) => k }.toSet
     lazy val averageShardsPerPod: ShardId                = if (pods.nonEmpty) shards.size / pods.size else 0
     private lazy val podVersions                         = pods.values.toList.map(extractVersion)
