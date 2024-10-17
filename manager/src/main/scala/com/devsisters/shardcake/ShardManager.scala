@@ -318,10 +318,10 @@ object ShardManager {
   sealed trait ShardingEvent
   object ShardingEvent {
     case class ShardsAssigned(pod: PodAddress, shards: Set[ShardId])   extends ShardingEvent {
-      override def toString: String = s"ShardsAssigned(pod=$pod, shards=${shards.toArray.sortInPlace.mkString("[", ", ", "]")})"
+      override def toString: String = s"ShardsAssigned(pod=$pod, shards=${renderShardIds(shards)})"
     }
     case class ShardsUnassigned(pod: PodAddress, shards: Set[ShardId]) extends ShardingEvent {
-      override def toString: String = s"ShardsUnassigned(pod=$pod, shards=${shards.toArray.sortInPlace.mkString("[", ", ", "]")})"
+      override def toString: String = s"ShardsUnassigned(pod=$pod, shards=${renderShardIds(shards)})"
     }
     case class PodRegistered(pod: PodAddress)                          extends ShardingEvent
     case class PodUnregistered(pod: PodAddress)                        extends ShardingEvent
