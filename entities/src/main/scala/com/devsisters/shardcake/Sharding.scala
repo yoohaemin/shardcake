@@ -629,6 +629,12 @@ object Sharding {
     Sharding.register.withFinalizer(_ => Sharding.unregister)
 
   /**
+   * Returns true if current node contains the singletons
+   */
+  def isSingletonNode: RIO[Sharding, Boolean] =
+    ZIO.serviceWithZIO[Sharding](_.isSingletonNode)
+
+  /**
    * Start a computation that is guaranteed to run only on a single pod.
    * Each pod should call `registerSingleton` but only a single pod will actually run it at any given time.
    */
@@ -681,6 +687,20 @@ object Sharding {
     sendTimeout: MessengerTimeout = MessengerTimeout.InheritConfigTimeout
   ): URIO[Sharding, Broadcaster[Msg]] =
     ZIO.serviceWith[Sharding](_.broadcaster(topicType, sendTimeout))
+
+  /**
+   * Get the list of shards and the pod that holds them.
+   *
+   * Note: ShardId may not show up if the shard is not assigned to any pod.
+   */
+  def getAssignments: RIO[Sharding, Map[ShardId, PodAddress]] =
+    ZIO.serviceWithZIO[Sharding](_.getAssignments)
+
+  /**
+   * Get the list of shards currently assigned to the current pod
+   */
+  def thisPodAssignments: RIO[Sharding, Chunk[ShardId]] =
+    ZIO.serviceWithZIO[Sharding](_.thisPodAssignments)
 
   /**
    * Get the list of pods currently registered to the Shard Manager
