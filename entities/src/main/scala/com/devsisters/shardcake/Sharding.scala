@@ -131,7 +131,9 @@ class Sharding private (
     shardAssignments.get
 
   val thisPodAssignments: UIO[Chunk[ShardId]] =
-    getAssignments.map(_.view.collect { case (shardId, addr) if addr == this.address => shardId }.to(Chunk))
+    getAssignments.map(a =>
+      Chunk.fromIterable(a.view.collect { case (shardId, addr) if addr == this.address => shardId })
+    )
 
   val getPods: UIO[Set[PodAddress]] =
     shardAssignments.get.map(_.values.toSet)
